@@ -37,8 +37,8 @@ void sfx_init()
 		// On volume change in main menu initialization
 		replace_call(ff7_externals.menu_start + 0x17, sfx_menu_force_channel_5_volume);
 		// On SFX volume change in config menu
-		replace_call(ff7_externals.menu_sound_slider_loop + 0x10A5, sfx_menu_play_sound_down);
-		replace_call(ff7_externals.menu_sound_slider_loop + 0x10DA, sfx_menu_play_sound_up);
+		replace_call(ff7_externals.menu_sound_slider_loop + 0x10C6, sfx_menu_play_sound_down);
+		replace_call(ff7_externals.menu_sound_slider_loop + 0x1108, sfx_menu_play_sound_up);
 		// Fix escape sound not played more than once
 		replace_function(ff7_externals.battle_clear_sound_flags, sfx_clear_sound_locks);
 		// On stop sound in battle swirl
@@ -134,14 +134,12 @@ void sfx_menu_force_channel_5_volume(uint volume, uint channel)
 	sfx_remember_volumes();
 }
 
-void sfx_update_volume(int modifier)
+void sfx_update_volume(int volume)
 {
-	if (trace_all || trace_music) info("Update SFX volumes %d\n", modifier);
+	if (trace_all || trace_music) info("Update SFX volumes %d\n", volume);
 
 	// Set master sfx volume
-	BYTE** sfx_tmp_volume = (BYTE**)(ff7_externals.menu_sound_slider_loop + 0x264);
-
-	*common_externals.master_sfx_volume = **sfx_tmp_volume + modifier;
+	*common_externals.master_sfx_volume = volume;
 
 	// Update sfx volume in real-time for all channel
 	for (int channel = 1; channel <= 5; ++channel) {
@@ -149,20 +147,16 @@ void sfx_update_volume(int modifier)
 	}
 }
 
-void sfx_menu_play_sound_down(uint id)
+void sfx_menu_play_sound_down(int volume)
 {
 	// Added by FFNx
-	sfx_update_volume(-1);
-	// Original call (curor sound)
-	common_externals.play_sfx(id);
+	sfx_update_volume(volume);
 }
 
-void sfx_menu_play_sound_up(uint id)
+void sfx_menu_play_sound_up(int volume)
 {
 	// Added by FFNx
-	sfx_update_volume(1);
-	// Original call (curor sound)
-	common_externals.play_sfx(id);
+	sfx_update_volume(volume);
 }
 
 void sfx_clear_sound_locks()
